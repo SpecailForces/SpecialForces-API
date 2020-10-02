@@ -1,0 +1,870 @@
+openapi: 3.0.0
+info:
+  title: specialforces
+  version: '1.0'
+  contact:
+    name: Seong Cheol Park
+    url: '-'
+    email: gorae02@gmail.com
+  description: |-
+    Special Forces API documentation
+
+    >
+    모든 API는 로그인 시 발급되는 access_token을 이용해 액세스 하여야 하며,<br>
+    access_token이 없거나, 유효하지 않을 시 401 에러와 오류 메시지를 반환합니다.
+
+
+
+    > 운동 종류<br>
+    {<br>
+    0: 팔굽<br>
+    1: 윗몸<br>
+    2: 뜀뛰기<br>
+    3: 벤치프레스<br>
+    4: 렛풀다운 <br>
+    5: 레그 익스텐션 <br>
+    6: 레그 프레스 <br>
+    7: 케이블 크로스오버<br>
+    }
+servers:
+  - url: 'https://spefor.ml'
+paths:
+  /api/v1/auth/login:
+    post:
+      summary: Login API
+      operationId: post-api-v1-auth-login
+      responses:
+        '200':
+          description: 토큰 정보 응답
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  expires_in:
+                    type: integer
+                  token_type:
+                    type: string
+                  scope: {}
+                  refresh_token:
+                    type: string
+              examples:
+                example-1:
+                  value:
+                    access_token: 3acfb3bea5cefc3aecc0b25f50b9539b6f5df3dc
+                    expires_in: 3600
+                    token_type: Bearer
+                    scope: null
+                    refresh_token: 636b6291c0398a16244f08b3fae42a4b277342ab
+      description: 로그인
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                grant_type:
+                  type: string
+                client_id:
+                  type: string
+                user_id:
+                  type: string
+                password:
+                  type: string
+              required:
+                - grant_type
+                - client_id
+                - user_id
+                - password
+            examples:
+              example-1:
+                value:
+                  grant_type: password
+                  client_id: app
+                  user_id: someuser
+                  password: verystrongpassword
+        description: |-
+          >앱에서 요청 시 grant_type="password", client_id="app" 입니다.<br>
+          Content-Type 에 유의하시기 바랍니다.(application/json)
+      parameters: []
+      security: []
+      tags:
+        - 멤버
+  /api/v1/test/testapi:
+    get:
+      summary: API 접근 테스트 API
+      tags:
+        - 테스트
+      responses:
+        '200':
+          description: API 접근 성공
+          headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+              examples:
+                example-1:
+                  value:
+                    success: true
+                    message: API 접근 성공!
+        '401':
+          description: Unauthorized (접근 권한 없음 - Token Invalid)
+      operationId: get-api-v1-test-testapi
+      description: API 사용 테스트
+  /api/v1/test/testconnection:
+    get:
+      summary: 서버 접속 테스트 API
+      tags:
+        - 테스트
+      responses:
+        '200':
+          description: 서버 접속 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+              examples:
+                example-1:
+                  value:
+                    success: true
+                    message: server all good!
+      operationId: get-api-v1-test-test2
+      description: 서버 접속 테스트 API
+      security: []
+    parameters: []
+  /api/v1/member/register:
+    parameters: []
+    post:
+      summary: 회원가입 API
+      operationId: post-api-v1-member-register
+      responses:
+        '200':
+          description: 회원가입 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+              examples:
+                example-1:
+                  value:
+                    success: true
+                    message: ''
+          headers: {}
+        '400':
+          description: '회원가입 실패(중복, 생략등의 이유)'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+              examples:
+                example-1:
+                  value:
+                    success: false
+                    message: 소속은(는) 공백일 수 없습니다
+      description: |-
+        회원가입 API
+
+        계급은 class 입니다 0: 이병, 1:일병, 2:상병, 3:병장
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: string
+                password:
+                  type: string
+                class:
+                  type: integer
+                  description: |-
+                    계급입니다.
+                    입력되지 않을 시 자동으로 이병(기본값 0)
+                cadre_flag:
+                  type: boolean
+                  description: |-
+                    간부 여부입니다.
+                    입력되지 않을 시 자동으로 병사(기본값 false)
+                army_num:
+                  type: string
+                unit_id:
+                  type: integer
+                email:
+                  type: string
+                phone:
+                  type: string
+              required:
+                - user_id
+                - password
+                - army_num
+                - unit_id
+                - email
+                - phone
+            examples:
+              example-1:
+                value:
+                  user_id: someuser
+                  password: verystrongpassword
+                  class: 1
+                  cadre_flag: false
+                  army_num: 20-00000000
+                  unit_id: 8839
+                  email: em@i.l
+                  phone: 010-0000-0000
+        description: 회원가입 요청
+      security: []
+      tags:
+        - 멤버
+  /api/v1/member/find_afflication:
+    get:
+      summary: 부대 검색 API
+      tags:
+        - 멤버
+      responses:
+        '200':
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  result:
+                    type: array
+                    items:
+                      type: string
+              examples:
+                example-1:
+                  value:
+                    success: true
+                    result:
+                      - 지상작전사령부 정보통신여단 111대대
+                      - 지상작전사령부 정보통신여단 112대대
+                      - 지상작전사령부 정보통신여단 311대대
+                      - 지상작전사령부 정보통신여단 312대대
+      operationId: get-api-v1-member-findafflication
+      description: 부대를 substring 으로 검색하여 결과를 반환합니다.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                substring:
+                  type: string
+              required:
+                - substring
+            examples:
+              example-1:
+                value:
+                  substring: 정보통신여단
+    parameters: []
+  /api/v1/exercise/add_exercise_profile:
+    post:
+      summary: 운동 프로필 추가 API
+      operationId: post-api-v1-exercise-add_exercise_profile
+      responses:
+        '200':
+          description: 처리결과 반환
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+              examples: {}
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                description: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                    minLength: 1
+                required:
+                  - success
+                  - message
+              examples:
+                example-1:
+                  value:
+                    success: false
+                    message: 입력 된 기록이 없습니다
+        '':
+          content:
+            application/json:
+              schema:
+                type: object
+      description: |
+        자신의 아이디에 운동 프로필을 추가합니다.
+        > !! exercise_weight, exercise_count, exercise_time 중 하나는 입력해야 합니다.
+
+        >운동 종류는 ___/exercise/get_exercises 에서 가져올 수 있음. 실 데이터는 Overview 참고
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                exercise_id:
+                  type: integer
+                  description: 운동 종류 코드입니다
+                exercise_weight:
+                  type: integer
+                exercise_count:
+                  type: integer
+                exercise_time:
+                  type: integer
+                  description: 분 단위
+              required:
+                - exercise_id
+            examples:
+              example-1:
+                value:
+                  exercise_id: 0
+                  exercise_weight: 0
+                  exercise_count: 100
+                  exercise_time: 30
+        description: |-
+          1번 예제
+          > 윗몸일으키기 100개, 30분 동안 함
+      tags:
+        - 운동
+    parameters: []
+  /api/v1/profile/set_weight:
+    post:
+      summary: 체중 입력 API
+      operationId: post-api-v1-profile-setweight
+      responses:
+        '200':
+          description: 처리 결과 반환
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+              examples:
+                example-1:
+                  value:
+                    success: true
+                    message: ''
+      description: |-
+        자신의 체중을 입력합니다. <br>
+        >체중 기입일 ~ 미기입기간 ~ 기입일 사이는 현재 입력하는 체중으로 채워집니다.<br> 예) 7월 15일, 7월 20일에 180kg 입력했다면, 7/15 ~ 7/20은 180kg.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                weight:
+                  type: integer
+              required:
+                - weight
+            examples:
+              example-1:
+                value:
+                  weight: 180
+        description: 체중 입력
+      tags:
+        - 프로필
+    parameters: []
+  /api/v1/profile/set_sleep:
+    parameters: []
+    post:
+      summary: 수면시간 입력 API
+      operationId: post-api-v1-profile-setsleep
+      responses:
+        '200':
+          description: 처리 결과 반환
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+              examples:
+                example-1:
+                  value:
+                    success: true
+                    message: ''
+      description: 수면 시간 입력 API입니다. 수면 시간을 입력받아 오늘의 profile에 저장합니다.
+      tags:
+        - 프로필
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                minute:
+                  type: integer
+                  description: 분단위
+  /api/v1/friend/add:
+    post:
+      summary: 전우 추가 API
+      operationId: post-api-v1-friend-add
+      description: 상대를 전우로 추가합니다. 수락은 별도입니다.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                target:
+                  type: string
+                  description: 상대의 아이디입니다
+              required:
+                - target
+            examples:
+              example-1:
+                value:
+                  target: id_of_target
+        description: ''
+      tags:
+        - 전우
+      responses:
+        '200':
+          description: 처리 결과 반환
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+              examples:
+                example-1:
+                  value:
+                    success: true
+                    message: ''
+  /api/v1/friend/accept:
+    post:
+      summary: 전우 추가 수락 API
+      operationId: post-api-v1-friend-accept
+      responses:
+        '200':
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+              examples:
+                example-1:
+                  value:
+                    success: true
+                    message: ''
+      description: '상대의 전우 추가 요청을 수락합니다 <br>(그러한 요청이 있는지 검증합니다)<br> 서버에서 상대->나 관계의 수락 여부를 true 로 바꾸고, 나->상대 관계도 true로 추가합니다.'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                target:
+                  type: string
+              required:
+                - target
+            examples:
+              example-1:
+                value:
+                  target: someone_to_accept
+      tags:
+        - 전우
+  /api/v1/friend/decline:
+    post:
+      summary: 전우 추가 거절 API
+      operationId: post-api-v1-friend-decline
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+              examples:
+                example-1:
+                  value:
+                    success: true
+                    message: ''
+      description: 상대의 전우 추가 요청을 거절합니다.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                target:
+                  type: string
+              required:
+                - target
+            examples:
+              example-1:
+                value:
+                  target: someone_to_decline
+      tags:
+        - 전우
+  /api/v1/friend/requestlist:
+    get:
+      summary: 전우 요청자 목록 API
+      tags:
+        - 전우
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  result:
+                    type: array
+                    items:
+                      type: string
+              examples:
+                example-1:
+                  value:
+                    success: true
+                    result:
+                      - someone_likes_you
+                      - someone_wants_you
+                      - someone_loves_you
+                      - someone_needs_you
+      operationId: get-api-v1-friend-requestlist
+      description: 전우를 요청한 아이디들을 리스팅합니다.
+  /api/v1/friend/list:
+    get:
+      summary: 전우 목록 API
+      tags:
+        - 전우
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  result:
+                    type: array
+                    items:
+                      type: string
+              examples:
+                example-1:
+                  value:
+                    success: true
+                    result:
+                      - someone_likes_you
+                      - someone_wants_you
+                      - someone_loves_you
+                      - someone_needs_you
+      operationId: get-api-friend-list
+      description: 자신의 전우 목록을 리스팅합니다
+    parameters: []
+  /api/v1/member/get_userinfo:
+    get:
+      summary: 유저 정보 API
+      tags:
+        - 멤버
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  result:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        user_id:
+                          type: string
+                        class:
+                          type: integer
+                          description: 계급
+                        army_num:
+                          type: string
+                          description: 군번
+                        unit_id:
+                          type: integer
+                          description: 소속ID
+                        email:
+                          type: string
+                        phone:
+                          type: string
+                        created_at:
+                          type: string
+                          description: 가입 시각
+              examples:
+                example-1:
+                  value:
+                    success: true
+                    result:
+                      - user_id: string
+                        class: '0'
+                        army_num: string
+                        unit_id: '123'
+                        email: string
+                        phone: string
+                        created_at: '2020-09-29 23:44:40'
+        '':
+          content:
+            application/json:
+              schema:
+                description: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  result:
+                    type: array
+                    uniqueItems: true
+                    minItems: 1
+                    items:
+                      required:
+                        - user_id
+                        - class
+                        - army_num
+                        - unit_id
+                        - email
+                        - phone
+                        - created_at
+                      properties:
+                        user_id:
+                          type: string
+                          minLength: 1
+                        class:
+                          type: string
+                          minLength: 1
+                        army_num:
+                          type: string
+                          minLength: 1
+                        unit_id:
+                          type: string
+                          minLength: 1
+                        email:
+                          type: string
+                          minLength: 1
+                        phone:
+                          type: string
+                          minLength: 1
+                        created_at:
+                          type: string
+                          minLength: 1
+                required:
+                  - success
+                  - result
+              examples:
+                example-1:
+                  value:
+                    success: true
+                    result:
+                      - user_id: string
+                        class: '0'
+                        army_num: string
+                        unit_id: '123'
+                        email: string
+                        phone: string
+                        created_at: '2020-09-29 23:44:40'
+      operationId: get-api-v1-member-get_userinfo
+      description: |-
+        유저의 정보를 반환하는 API 입니다. 
+
+        주로 로그인 직후에 유저 정보를 받아오거나, 유저 정보를 갱신할 필요가 있을 때 사용합니다.
+    parameters: []
+  /api/v1/exercise/get_exercise_ids:
+    get:
+      summary: 운동 종목 모두 가져오기 API
+      tags:
+        - 운동
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  result:
+                    type: array
+                    items:
+                      type: string
+              examples:
+                example-2:
+                  value:
+                    success: true
+                    result:
+                      - exercise_id: '0'
+                        exercise_name: 팔굽혀펴기
+                        exercise_part: ''
+                      - exercise_id: '1'
+                        exercise_name: 윗몸일으키기
+                        exercise_part: ''
+                      - exercise_id: '2'
+                        exercise_name: 뜀뛰기
+                        exercise_part: ''
+                      - exercise_id: '3'
+                        exercise_name: 벤치프레스
+                        exercise_part: ''
+                      - exercise_id: '4'
+                        exercise_name: 렛풀다운
+                        exercise_part: ''
+                      - exercise_id: '5'
+                        exercise_name: 레그 익스텐션
+                        exercise_part: ''
+                      - exercise_id: '6'
+                        exercise_name: 레그 프레스
+                        exercise_part: ''
+                      - exercise_id: '7'
+                        exercise_name: 케이블 크로스오버
+                        exercise_part: ''
+        '':
+          content:
+            application/json:
+              schema:
+                description: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  result:
+                    type: array
+                    uniqueItems: true
+                    minItems: 1
+                    items:
+                      required:
+                        - exercise_id
+                        - exercise_name
+                        - exercise_part
+                      properties:
+                        exercise_id:
+                          type: string
+                          minLength: 1
+                        exercise_name:
+                          type: string
+                          minLength: 1
+                        exercise_part:
+                          type: string
+                required:
+                  - success
+                  - result
+              examples:
+                example-1:
+                  value:
+                    success: true
+                    result:
+                      - exercise_id: '0'
+                        exercise_name: 팔굽혀펴기
+                        exercise_part: ''
+                      - exercise_id: '1'
+                        exercise_name: 윗몸일으키기
+                        exercise_part: ''
+                      - exercise_id: '2'
+                        exercise_name: 뜀뛰기
+                        exercise_part: ''
+                      - exercise_id: '3'
+                        exercise_name: 벤치프레스
+                        exercise_part: ''
+                      - exercise_id: '4'
+                        exercise_name: 렛풀다운
+                        exercise_part: ''
+                      - exercise_id: '5'
+                        exercise_name: 레그 익스텐션
+                        exercise_part: ''
+                      - exercise_id: '6'
+                        exercise_name: 레그 프레스
+                        exercise_part: ''
+                      - exercise_id: '7'
+                        exercise_name: 케이블 크로스오버
+                        exercise_part: ''
+          description: 결과
+      operationId: get-api-v1-exercise-get_exercises_ids
+      description: 가능한 운동(종목) 정보 을 모두 가져옵니다.
+    parameters: []
+  /api/v1/profile/add_today:
+    parameters: []
+components:
+  schemas: {}
+  securitySchemes:
+    access_token:
+      type: http
+      scheme: bearer
+      description: API 접근 시 필요
+    user credentials:
+      type: oauth2
+      flows:
+        password:
+          tokenUrl: ''
+          refreshUrl: ''
+          scopes: {}
+      description: ''
+security:
+  - access_token: []
+tags:
+  - name: 멤버
+  - name: 테스트
+  - name: 프로필
+  - name: 전우
+  - name: 운동
